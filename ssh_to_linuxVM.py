@@ -1,25 +1,35 @@
 import paramiko
+import sys
 
-def ssh_command(hostname, username, password, command):
 
-    client = paramiko.SSHClient()
+def ssh_command(hostname, username, passwd):
+    ssh_client = paramiko.SSHClient()
+    ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    try:
+        ssh_client.connect(hostname=hostname, username= username, password=passwd)
+        print("Connected to", hostname)
+        command = "ls -l"
+        stdin, stdout, stderr = ssh_client.exec_command(command)
+        # stdin, stdout, stderr inbuilt variables
 
-    client.connect(hostname, username=username, password=password)
+        output = stdout.read().decode("utf-8")
+        err = stderr.read().decode("utf-8")
+        print(output)
+        print(err)
 
-    stdin, stdout, stderr = client.exec_command(command)
+    except paramiko.AuthenticationException:
+        print("Error: AuthenticationException")
 
-    output = stdout.read().decode('utf-8')
+    except:
+        print("Error: Unable to connect to SSH")
 
-    print(output)
+    finally:
+        ssh_client.close()
+        print("Connection Closed.")
 
-    client.close()
-
-hostname = '192.168.1.11'
-port = 22
-username = 'root'
-password = '12345'
-command = 'ls -l'
-
-ssh_command(hostname, username, password, command)
+if _name_ == "_main_":
+    shh_ip = sys.argv[1]
+    username = sys.argv[2]
+    passwd = sys.argv[3]
+    ssh_command(ssh_ip, username, passwd)
